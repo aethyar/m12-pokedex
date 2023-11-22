@@ -1,52 +1,51 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { db } from '@/js/firebase.js'
+import { collection, onSnapshot } from 'firebase/firestore'
+
+import EntryCard from '@/components/EntryCard.vue'
+
+const pokemons = ref([])
+
+async function getPokemons() {
+  onSnapshot(collection(db, 'pokemons'), (querySnapshot) => {
+    let pokemonsSnapshot = []
+    querySnapshot.forEach((doc) => {
+      let pokemon = {
+        id: doc.id,
+        name: doc.data().name,
+        type1: doc.data().type1,
+        type2: doc.data().type2,
+        japanese_name: doc.data().japanese_name,
+        evolution: doc.data().evolution,
+        image_url: doc.data().image_url
+      }
+      pokemonsSnapshot.push(pokemon)
+    })
+  pokemons.value = pokemonsSnapshot
+  })
+}
+
+onMounted(async () => {
+  console.log('Connecting to Firebase')
+  await getPokemons()
+})
+</script>
+
 <template>
-  <div class="about">
-    <h1>IN-CLASS-M11 - Pokedex</h1>
-
-    <div class="purpose-scope">
-      <h2>Purposes:</h2>
-      <p>To review and use what we learn in this module into a real web application.</p>
-
-      <h2>Scope:</h2>
-      <p>
-        Write an application that lists the Pokemon on the landing page. When the user clicks on any
-        Pokemon, the page should show another view that provides more details of that Pokemon.
-      </p>
-    </div>
+  <div class="entries">
+    <EntryCard v-for="pokemon in pokemons" :key="pokemon.id" :pokemon="pokemon" />
   </div>
 </template>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
-@media (min-width: 1024px) {
-  .about {
-    min-height: 50vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Oswald', sans-serif;
-  }
+<style scoped>
+.entries {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
-  h1 {
-    font-size: 2em;
-    margin-bottom: 20px;
-  }
-
-  .purpose-scope {
-    text-align: left;
-    max-width: 600px;
-  }
-
-  h2 {
-    font-size: 1.5em;
-    margin-top: 20px;
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 1.2em;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
+.entry-card {
+  margin: 10px;
 }
 </style>
